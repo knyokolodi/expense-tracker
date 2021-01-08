@@ -1,0 +1,35 @@
+import React, { useReducer, createContext } from 'react';
+import { defaultTransactions } from '../constants/transactions';
+import { contextReducer } from './contextReducer';
+
+const initialState =
+  JSON.parse(localStorage.getItem('transactions')) || defaultTransactions;
+
+export const ExpenseTrackerContext = createContext(initialState);
+
+export const Provider = ({ children }) => {
+  const [transactions, dispatch] = useReducer(contextReducer, initialState);
+
+  const deleteTransaction = (id) => {
+    console.log(id);
+    dispatch({ type: 'DELETE_TRANSACTON', payload: id });
+  };
+
+  const addTransaction = (transaction) => {
+    dispatch({ type: 'ADD_TRANSACTON', payload: transaction });
+  };
+
+  const balance = transactions.reduce((acc, currVal) => {
+    return currVal.type === 'Expense'
+      ? acc - currVal.amount
+      : acc + currVal.amount;
+  }, 0);
+
+  return (
+    <ExpenseTrackerContext.Provider
+      value={{ addTransaction, deleteTransaction, transactions, balance }}
+    >
+      {children}
+    </ExpenseTrackerContext.Provider>
+  );
+};
